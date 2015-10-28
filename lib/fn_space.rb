@@ -25,8 +25,12 @@ class FnSpace < BasicObject
       @obj = obj
     end
 
-    def as(constant)
-      ::Object.const_set(constant, @obj)
+    def to(constant)
+      if ::Object.const_defined?(constant)
+        ::Object.const_get(constant).merge!(@functions)
+      else
+        ::Object.const_set(constant, @functions)
+      end
     end
   end
 end

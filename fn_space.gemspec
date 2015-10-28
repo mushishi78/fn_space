@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name         = 'fn_space'
-  s.version      = '0.0.1'
+  s.version      = '0.1.0'
   s.author       = 'Max White'
   s.email        = 'mushishi78@gmail.com'
   s.homepage     = 'https://github.com/mushishi78/fn_space'

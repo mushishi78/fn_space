@@ -27,7 +27,7 @@ class FnSpace
 
   result = ->(a, b) { add.(times.(a, b), take.(a, b)) }
 
-  export(result: result).as 'Sums'
+  export(result: result).to 'Sums'
 end
 
 Sums[:result].(5, 8) # 37
