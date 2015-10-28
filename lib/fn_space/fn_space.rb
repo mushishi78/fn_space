@@ -1,7 +1,6 @@
 class FnSpace < BasicObject
   const_defined = ::Object.method(:const_defined?)
   const_get = ::Object.method(:const_get)
-  const_set = ::Object.method(:const_set)
   importer = ::Struct.new(:from)
   exporter = ::Struct.new(:as)
 
