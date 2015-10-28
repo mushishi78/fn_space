@@ -1,36 +1,36 @@
 # FnSpace
 
-A Ruby class for explicit function importing and exporting.
+A Ruby class for explicit importing and exporting.
 
 ## Example
 
 ``` ruby
+# my_awsome_project/formula.rb
 require 'fn_space'
-
-module Foo
-  def self.add(a, b)
-    a + b
-  end
-
-  def self.take(a, b)
-    a - b
-  end
-end
-
-Bar = {
-  times: ->(a, b) { a * b }
-}
+require 'ostruct'
 
 class FnSpace
-  add, take = import(:add, :take).from 'Foo'
-  times = import(:times).from 'Bar'
+  pi = import.('Math::PI')
+  struct = import_methods.(:new).from.('OpenStruct')
 
-  result = ->(a, b) { add.(times.(a, b), take.(a, b)) }
+  circ = ->(r) { 2 * pi * r }
+  area = ->(r) { pi * r ** 2 }
 
-  export(result: result).to 'Sums'
+  formula = struct.(circumference: circ, area: area)
+  export.(formula).as.('Formula')
 end
+```
 
-Sums[:result].(5, 8) # 37
+``` ruby
+# my_awsome_project/other_file.rb
+require 'fn_space'
+require_relative 'formula'
+
+class FnSpace
+  fn1, fn2 = import.(:area, :circumference).from.('Formula')
+  p fn1.(8) # 201.06...
+  p fn2.(8) # 50.265...
+end
 ```
 
 ## Installation
