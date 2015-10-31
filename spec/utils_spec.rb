@@ -1,6 +1,14 @@
 require 'fn_space/utils'
 
 describe FnSpace::Utils do
+  describe 'mod' do
+    it 'creates a object with assign function' do
+      res = FnSpace::Utils.mod.().assign(:q){50}.assign(:w){93}
+      expect(res.q).to eql(50)
+      expect(res.w).to eql(93)
+    end
+  end
+
   describe 'struct' do
     it 'creates a struct from a hash' do
       res = FnSpace::Utils.struct.(a: 57, b: 6)
@@ -8,9 +16,9 @@ describe FnSpace::Utils do
     end
   end
 
-  describe 'send' do
+  describe 'apply_send' do
     it 'creates a lamda that sends a message with paramaters to the first argument' do
-      add_five = FnSpace::Utils.send.(:+, 5)
+      add_five = FnSpace::Utils.apply_send.(:+, 5)
       expect(add_five.(9)).to eql(14)
     end
   end

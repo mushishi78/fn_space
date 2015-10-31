@@ -1,19 +1,15 @@
-require_relative 'fn_space'
+require_relative 'assignable'
 
-class FnSpace
-  new = import_methods.(:new).from.('Module')
+mod = ->(&b) { Module.new(&b).extend(FnSpace::Assignable) }
+struct = ->(hash) { hash.reduce(mod.()) { |obj, (k, v)| obj.assign(k){v} } }
+apply_send = ->(method, *args) { ->(obj) { obj.send(method, *args) } }
 
-  assign = ->(obj, name, &b) { obj.define_singleton_method(name, &b); obj }
-  struct = ->(hash) { hash.reduce(new.()) { |obj, (k, v)| assign.(obj, k) { v } } }
-  send = ->(method, *args) { ->(obj) { obj.send(method, *args) } }
-
-  chain = ->(value) do
-    obj = new.()
-    assign.(obj, :>>) { |fn| value = fn.(value); obj }
-    assign.(obj, :<<) { |fn| fn.(value); obj }
-    assign.(obj, :|) { |_| value }
-  end
-
-  utils = struct.(new: new, assign: assign, struct: struct, send: send, chain: chain)
-  export.(utils).as.('FnSpace::Utils')
+chain = ->(value) do
+  monad = mod.()
+    .assign(:>>) { |fn| value = fn.to_proc.(value); monad }
+    .assign(:<<) { |fn| fn.to_proc.(value); monad }
+    .assign(:|) { |fn| fn.to_proc.(monad) }
+    .assign(:value) { value }
 end
+
+FnSpace::Utils = struct.(mod: mod, struct: struct, apply_send: apply_send, chain: chain)

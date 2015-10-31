@@ -1,30 +1,20 @@
 # FnSpace
 
-`FnSpace` is a space where functions can be treated as first class
+FnSpace is a space where functions can be treated as first class
 objects. It provides import and export helpers that serve to elevate the stature
 of functions and utility methods to encourage the use of more functional
 paradigms.
-
-Within the `FnSpace` class scope, tradition constant lookup will fail. This is
-because it directly inherits from `BasicObject`. The purpose is of this is to
-foster a discipline of using import helpers.
 
 ## Example
 
 ``` ruby
 # my_awsome_project/formula.rb
 require 'fn_space'
-require 'ostruct'
 
-class FnSpace
-  pi = import.('Math::PI')
-  ostruct = import_methods.(:new).from.('OpenStruct')
-
-  circ = ->(r) { 2 * pi * r }
-  area = ->(r) { pi * r ** 2 }
-
-  formula = ostruct.(circumference: circ, area: area)
-  export.(formula).as.('Formula')
+fn_space(:Formula) do |import, exports|
+  pi = 3.14
+  exports.circ = ->(r) { 2 * pi * r }
+  exports.area = ->(r) { pi * r ** 2 }
 end
 ```
 
@@ -33,50 +23,128 @@ end
 require 'fn_space'
 require_relative 'formula'
 
-class FnSpace
-  fn1, fn2 = import.(:area, :circumference).from.('Formula')
-  p fn1.(8) # 201.06...
-  p fn2.(8) # 50.265...
+fn_space do |import|
+  fn1, fn2 = import.(:area, :circ).from Formula
+  fn1.(8) # 200.96
+  fn2.(8) # 50.24
 end
 ```
 
 ## Usage
 
-### `FnSpace.import`
+### `fn_space(const = nil) { |import, exports| block }`
 
-If given a the name of a constant, `import` fetches it.
+`fn_space` is a global method that executes a block passed to it in an
+anonymous module. It passes two arguments to the provided block, `import` and
+`exports`.
+
+It optionally takes a new constant's name as it first argument, which will then
+be used to store any properties added to the `exports` OpenStruct.
+
+### `import.(*names).from Source`
+
+`import.()` can be used to import properties from a source. If only a single
+property is requested then only a single value will be return, otherwise an
+array will be.
 
 ``` ruby
-pi = import.('Math::PI')
+MagicNumbers = Struct.new(:a, :b, :c).new(5, 7, 19)
+
+fn_space do |import|
+  b = import.(:b).from MagicNumbers
+  c, a = import.(:c, :a).from MagicNumbers
+
+  a + b + c # 31
+end
 ```
 
-If given a list of properties, `import` returns an object with a `from` method
-that can be used to supply the name of constant. It then returns an array
-of the values of those properties.
+### `import.methods.(*names).from Source`
+
+`import.methods.()` can be used to import methods from a source as method objects.
 
 ``` ruby
-fn1, fn2 = import.(:area, :circumference).from.('Formula')
+fn_space do |import|
+  tan = import.methods.(:tan).from Math
+  sin, cos = import.methods.(:sin, :cos).from Math
+  pi = Math::PI
+
+  tan.(0) # 0
+  sin.(pi/2) # 1.0
+  cos.(pi) # -1.0
+end
 ```
 
-### 'FnSpace.import_methods'
+## Utils
 
-`import_methods` takes a list of methods, and returns an object with a `from` method
-that can be used to supply the name of constant. It then returns an array
-of those methods as method objects.
+### `mod.()`
+
+`mod.()` creates a new anonymous module with an `assign` singleton method that
+can be used to create singleton methods in a chain.
 
 ``` ruby
-ostruct = import_methods.(:new).from.('OpenStruct')
+fn_space do |import|
+  mod = import.(:mod).from FnSpace::Utils
+  foo = mod.()
+    .assign(:add) { |a, b| a + b }
+    .assign(:take) { |a, b| a - b }
+
+  foo.add(3, 4) # 7
+  foo.take(5, 2) # 3
+end
 ```
 
-Note: Method objects are still bound to their original objects, unless you
-explicitly `unbind` them.
+### `struct.(hash)`
 
-### `FnSpace.export`
-
-`export` can be used to assign an object to a constant.
+`struct.()` takes a hash and creates a new anonymous module with properties
+taken from the hash.
 
 ``` ruby
-export.(formula).as.('Formula')
+fn_space do |import|
+  struct = import.(:struct).from FnSpace::Utils
+  crds = struct.(x: 0.5, y: 1.5, z: -1.0)
+  crds.x  + crds.y + crds.z # 1.0
+end
+```
+
+### `chain.(value)`
+
+`chain.()` wraps around a value and can be used to chain functions to be applied
+to the value. It does this by providing the following methods:
+
+* `>>` - This applies a given function to the value and replaces the value
+         with the result of the function.
+* `<<` - This applies a given function to the value but does not replace the
+         value.
+* `|` - This applies a given function to the chain itself.
+* `value` - This returns the value.
+
+Function arguments have their `#to_proc` method called first such that symbols
+can be used to call methods on an object.
+
+``` ruby
+fn_space do |import|
+  chain = import.(:chain).from FnSpace::Utils
+
+  double = ->(v) { v * 2 }
+  log = ->(v) { puts v }
+
+  res = chain.(3) >> double >> :next << log >> double << log >> :next | :value
+  # 7
+  # 14
+  puts res # 15
+end
+```
+
+### `apply_send.(*args)`
+
+`apply_send.()` can be used to apply arguments to an object's `send` method.
+This can useful used in conjunction with the `chain` utility.
+
+``` ruby
+fn_space do |import|
+  chain, send = import.(:chain, :apply_send).from FnSpace::Utils
+  chain.(2) >> send.(:**, 3) >> send.(:/, 4) | :value # 2
+end
 ```
 
 ## Installation
