@@ -1,9 +1,8 @@
 # FnSpace
 
 FnSpace is a space where functions can be treated as first class
-objects. It provides import and export helpers that serve to elevate the stature
-of functions and utility methods to encourage the use of more functional
-paradigms.
+objects. It provides import and export helpers that help prioritize functions
+and utility methods to encourage the use of functional paradigms.
 
 ## Example
 
@@ -111,12 +110,10 @@ end
 `chain.()` wraps around a value and can be used to chain functions to be applied
 to the value. It does this by providing the following methods:
 
-* `>>` - This applies a given function to the value and replaces the value
-         with the result of the function.
-* `<<` - This applies a given function to the value but does not replace the
-         value.
-* `|` - This applies a given function to the chain itself.
-* `value` - This returns the value.
+* `>>` - Applies a function to the value and replaces the value with the result.
+* `<<` - Applies a function to the value but does not replace the value.
+* `|`  - Applies a function to the chain object itself.
+* `value` - Returns the value.
 
 Function arguments have their `#to_proc` method called first such that symbols
 can be used to call methods on an object.
