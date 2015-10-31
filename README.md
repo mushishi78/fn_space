@@ -1,8 +1,8 @@
 # FnSpace
 
-FnSpace is a space where functions can be treated as first class
-objects. It provides import and export helpers that help prioritize functions
-and utility methods to encourage the use of functional paradigms.
+FnSpace is a space where functions can be treated as first class objects. It
+provides import and export helpers that prioritize functions and utility
+methods to enable functional paradigms.
 
 ## Example
 
