@@ -43,8 +43,8 @@ be used to store any properties added to the `exports` OpenStruct.
 ### `import.(*names).from Source`
 
 `import.()` can be used to import properties from a source. If only a single
-property is requested then only a single value will be return, otherwise an
-array will be.
+property is requested then only a single value will be returned, otherwise an
+array of values will.
 
 ``` ruby
 MagicNumbers = Struct.new(:a, :b, :c).new(5, 7, 19)
