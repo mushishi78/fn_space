@@ -10,7 +10,7 @@ methods to enable functional paradigms.
 # my_awsome_project/formula.rb
 require 'fn_space'
 
-fn_space(:Formula) do |import, exports|
+fn_space('Formula') do |import, exports|
   pi = 3.14
   exports.circ = ->(r) { 2 * pi * r }
   exports.area = ->(r) { pi * r ** 2 }
